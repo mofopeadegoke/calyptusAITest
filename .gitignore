@@ -4,3 +4,4 @@ coverage/
 .impeccable/*
 !.impeccable/surfaces/
 todo.md
+*.tsbuildinfo
