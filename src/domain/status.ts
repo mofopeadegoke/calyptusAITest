@@ -23,3 +23,11 @@ export type StatusFilter = 'all' | StatusKey | `unknown:${string}`;
 export function statusFilterOf(status: Status): Exclude<StatusFilter, 'all'> {
   return status.kind === 'known' ? status.key : `unknown:${status.raw}`;
 }
+
+function isStatusKeyFilter(filter: Exclude<StatusFilter, 'all'>): filter is StatusKey {
+  return Object.hasOwn(STATUS, filter);
+}
+
+export function statusFilterLabel(filter: Exclude<StatusFilter, 'all'>): string {
+  return isStatusKeyFilter(filter) ? STATUS[filter].label : filter.slice('unknown:'.length);
+}
