@@ -9,8 +9,11 @@ export type Status = { kind: 'known'; key: StatusKey } | { kind: 'unknown'; raw:
 
 export type Customer = { name: string | null; email: string | null } | null;
 
+export type IssueField = 'customer' | 'name' | 'total' | 'created_at' | 'items' | 'status' | 'currency';
+
 export type DataIssue = {
-  field: 'customer' | 'name' | 'total' | 'created_at' | 'items' | 'status' | 'currency';
+  severity: 'defect' | 'note';
+  field: IssueField;
   message: string;
 };
 

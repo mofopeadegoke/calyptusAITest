@@ -4,7 +4,7 @@ import { formatMoney } from '../domain/money';
 import type { Sort, SortDir, SortKey } from '../domain/selectOrders';
 import { formatAtSource, formatLocal } from '../domain/time';
 import type { Order } from '../domain/types';
-import { DataIssues } from './DataIssues';
+import { CellIssues } from './CellIssues';
 import { StatusLabel } from './StatusLabel';
 
 const SORT_CAPTION: Record<SortKey, { label: string } & Record<SortDir, string>> = {
@@ -60,10 +60,10 @@ function PlacedCell({ order }: { order: Order }) {
   if (order.createdAt === null) return <Absent>Time unavailable</Absent>;
   const atSource = order.sourceOffset ? formatAtSource(order.createdAt, order.sourceOffset) : null;
   return (
-    <time dateTime={order.createdAt.toISOString()} title={atSource ? `Customer's time: ${atSource}` : undefined}>
-      {formatLocal(order.createdAt)}
-      {atSource && <span className="vh">, customer's time {atSource}</span>}
-    </time>
+    <>
+      <time dateTime={order.createdAt.toISOString()}>{formatLocal(order.createdAt)}</time>
+      {atSource && <span className="source-time">Customer's time {atSource}</span>}
+    </>
   );
 }
 
@@ -98,20 +98,28 @@ export function OrdersTable({ orders, sort, onSort }: OrdersTableProps) {
           {orders.map((order) => (
             <tr key={order.id}>
               <th scope="row" className="order-id">
-                <span>{order.id}</span>
-                <DataIssues issues={order.issues} />
+                {order.id}
               </th>
               <td className="customer">
                 <CustomerCell customer={order.customer} />
+                <CellIssues issues={order.issues} fields={['customer', 'name']} />
               </td>
-              <td className="num">{order.amount ? formatMoney(order.amount) : <Absent>Total unavailable</Absent>}</td>
+              <td className="num">
+                {order.amount ? formatMoney(order.amount) : <Absent>Total unavailable</Absent>}
+                <CellIssues issues={order.issues} fields={['total', 'currency']} />
+              </td>
               <td>
                 <StatusLabel status={order.status} />
+                <CellIssues issues={order.issues} fields={['status']} />
               </td>
               <td className="placed">
                 <PlacedCell order={order} />
+                <CellIssues issues={order.issues} fields={['created_at']} />
               </td>
-              <td className="num">{order.items ?? <Absent>Unknown</Absent>}</td>
+              <td className="num">
+                {order.items ?? <Absent>Unknown</Absent>}
+                <CellIssues issues={order.issues} fields={['items']} />
+              </td>
             </tr>
           ))}
         </tbody>

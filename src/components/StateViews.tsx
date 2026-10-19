@@ -17,7 +17,9 @@ export function Loading() {
         </div>
         <div className="board">
           {[0, 1, 2].map((i) => (
-            <span key={i} className="skel skel-board-row" />
+            <span key={i} className="skel-board-slot">
+              <span className="skel skel-board-row" />
+            </span>
           ))}
         </div>
       </div>

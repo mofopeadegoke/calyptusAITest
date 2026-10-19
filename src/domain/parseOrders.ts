@@ -23,20 +23,20 @@ function parseTotal(raw: unknown, issues: DataIssue[]): number | null {
   if (typeof raw === 'number' && Number.isFinite(raw)) return raw;
   if (typeof raw === 'string' && NUMERIC_TEXT.test(raw.trim())) {
     const value = Number(raw.trim());
-    issues.push({ field: 'total', message: `Total was text in the export; read as ${value.toFixed(2)}` });
+    issues.push({ severity: 'defect', field: 'total', message: `Total was text in the export; read as ${value.toFixed(2)}` });
     return value;
   }
   if (raw === null || raw === undefined) {
-    issues.push({ field: 'total', message: 'Total missing in export' });
+    issues.push({ severity: 'defect', field: 'total', message: 'Total missing in export' });
   } else {
-    issues.push({ field: 'total', message: `Total “${String(raw)}” in export is not a number` });
+    issues.push({ severity: 'defect', field: 'total', message: `Total “${String(raw)}” in export is not a number` });
   }
   return null;
 }
 
 function parseCurrency(raw: unknown, issues: DataIssue[]): string | null {
   if (typeof raw === 'string' && CURRENCY_CODE.test(raw)) return raw;
-  issues.push({ field: 'currency', message: 'Currency missing or unreadable in export' });
+  issues.push({ severity: 'defect', field: 'currency', message: 'Currency missing or unreadable in export' });
   return null;
 }
 
@@ -56,13 +56,13 @@ function parseText(raw: unknown): string | null {
 
 function parseCustomer(raw: unknown, issues: DataIssue[]): Customer {
   if (!isRecord(raw)) {
-    issues.push({ field: 'customer', message: 'No customer record' });
+    issues.push({ severity: 'defect', field: 'customer', message: 'No customer record' });
     return null;
   }
   const name = parseText(raw.name);
-  if (name === null) issues.push({ field: 'name', message: 'Name blank in export' });
+  if (name === null) issues.push({ severity: 'defect', field: 'name', message: 'Name blank in export' });
   const email = parseText(raw.email);
-  if (email === null) issues.push({ field: 'customer', message: 'Email blank in export' });
+  if (email === null) issues.push({ severity: 'defect', field: 'customer', message: 'Email blank in export' });
   return { name, email };
 }
 
@@ -70,7 +70,7 @@ function parseStatus(raw: unknown, issues: DataIssue[]): Status {
   const text = typeof raw === 'string' ? raw.trim().toLowerCase() : '';
   if (isStatusKey(text)) return { kind: 'known', key: text };
   const shown = typeof raw === 'string' && raw.trim() !== '' ? raw.trim() : 'missing';
-  issues.push({ field: 'status', message: `Status “${shown}” is not one the dashboard knows` });
+  issues.push({ severity: 'defect', field: 'status', message: `Status “${shown}” is not one the dashboard knows` });
   return { kind: 'unknown', raw: shown };
 }
 
@@ -86,13 +86,13 @@ function parseCreatedAt(
       return { createdAt: date, sourceOffset: offset === 'Z' ? '+00:00' : offset };
     }
   }
-  issues.push({ field: 'created_at', message: 'Order time missing or unreadable in export' });
+  issues.push({ severity: 'defect', field: 'created_at', message: 'Order time missing or unreadable in export' });
   return { createdAt: null, sourceOffset: null };
 }
 
 function parseItems(raw: unknown, issues: DataIssue[]): number | null {
   if (typeof raw === 'number' && Number.isInteger(raw) && raw >= 0) return raw;
-  issues.push({ field: 'items', message: 'Item count missing or invalid in export' });
+  issues.push({ severity: 'defect', field: 'items', message: 'Item count missing or invalid in export' });
   return null;
 }
 
@@ -105,7 +105,7 @@ function parseOrder(row: unknown, index: number): Order {
   const amount = parseAmount(row, issues);
   const status = parseStatus(row.status, issues);
   if (amount?.minor === 0 && status.kind === 'known' && status.key === 'paid') {
-    issues.push({ field: 'total', message: 'Paid order with a zero total' });
+    issues.push({ severity: 'note', field: 'total', message: 'Paid order with a zero total' });
   }
   const { createdAt, sourceOffset } = parseCreatedAt(row.created_at, issues);
   const items = parseItems(row.items, issues);

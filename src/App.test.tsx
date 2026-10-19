@@ -65,15 +65,14 @@ describe('loading', () => {
   });
 
   test('rows state repairs and absences in place', async () => {
-    const { user } = await renderReady();
+    await renderReady();
     const row = (id: string) => screen.getByRole('rowheader', { name: new RegExp(id) }).closest('tr')!;
     expect(row('ORD-1004')).toHaveTextContent('Unknown customer');
     expect(row('ORD-1014')).toHaveTextContent('(no name)');
     expect(row('ORD-1007')).toHaveTextContent('Total unavailable');
 
-    const issue = within(row('ORD-1006')).getByText('Data issue');
-    await user.click(issue);
-    expect(within(row('ORD-1006')).getByText('Total was text in the export; read as 149.50')).toBeVisible();
+    const totalCell = within(row('ORD-1006')).getByText('€149.50').closest('td')!;
+    expect(within(totalCell).getByText('Total was text in the export; read as 149.50')).toBeVisible();
   });
 
   test('times show the viewer zone and carry the customer time', async () => {
@@ -81,8 +80,8 @@ describe('loading', () => {
     const row = screen.getByRole('rowheader', { name: /ORD-1024/ }).closest('tr')!;
     const time = row.querySelector('time')!;
     expect(time).toHaveAttribute('dateTime', '2026-10-13T04:10:00.000Z');
-    expect(time).toHaveAttribute('title', "Customer's time: 12 Oct 2026, 21:10 (UTC−07:00)");
-    expect(time).toHaveTextContent("13 Oct 2026, 05:10 BST, customer's time 12 Oct 2026, 21:10 (UTC−07:00)");
+    expect(time).toHaveTextContent('13 Oct 2026, 05:10 BST');
+    expect(time.closest('td')).toHaveTextContent("Customer's time 12 Oct 2026, 21:10 (UTC−07:00)");
   });
 });
 

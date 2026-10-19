@@ -1,5 +1,6 @@
 :root {
   color-scheme: light;
+  scrollbar-color: var(--muted) var(--ground);
 
   --ground: #eef1f5;
   --surface: #ffffff;
@@ -105,24 +106,23 @@ input {
 }
 
 .mark {
-  display: grid;
-  gap: 4px;
+  display: flex;
+  align-items: center;
 }
 
 .mark span {
   display: block;
-  width: 26px;
-  height: 5px;
-  border-radius: 2px;
+  width: 12px;
+  height: 6px;
   background: var(--bar);
 }
 
-.mark span:nth-child(2) {
-  width: 18px;
+.mark span:first-child {
+  border-radius: 3px 0 0 3px;
 }
 
-.mark span:nth-child(3) {
-  width: 22px;
+.mark span:last-child {
+  border-radius: 0 3px 3px 0;
 }
 
 .page {
@@ -428,8 +428,6 @@ input {
 }
 
 .order-id {
-  width: 12rem;
-  min-width: 12rem;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -457,9 +455,13 @@ input {
 }
 
 .placed time {
-  text-decoration: underline dotted var(--rule);
-  text-underline-offset: 4px;
-  cursor: help;
+  display: block;
+}
+
+.source-time {
+  display: block;
+  font-size: 13px;
+  color: var(--muted);
 }
 
 .absent {
@@ -469,35 +471,36 @@ input {
 
 /* Data issues */
 
-.issues {
-  margin-top: 4px;
+.cell-issues {
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
+  color: var(--ink);
+  text-align: left;
   white-space: normal;
 }
 
-.issues summary {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-weight: 700;
-  color: var(--line-failed);
-  cursor: pointer;
-  list-style: none;
-  white-space: nowrap;
-  border-radius: 2px;
+.cell-issues li {
+  display: flex;
+  gap: 6px;
+  align-items: flex-start;
+  max-width: 16rem;
 }
 
-.issues summary::-webkit-details-marker {
-  display: none;
+.num .cell-issues li {
+  margin-left: auto;
 }
 
-.issues ul {
-  margin: 6px 0 0;
-  padding: 0 0 0 16px;
-  max-width: 14rem;
-  color: var(--ink);
-  overflow-wrap: normal;
+.cell-issues svg {
+  flex: none;
+  margin-top: 2px;
+}
+
+.cell-issues li[data-severity='note'] {
+  font-weight: 500;
+  color: var(--muted);
 }
 
 /* States */
@@ -561,22 +564,31 @@ input {
 
 .skel-label {
   width: 9rem;
+  height: calc(15px * 1.45);
 }
 
 .skel-headline {
   width: 16rem;
-  height: 56px;
-  margin: 4px 0;
+  height: calc(clamp(44px, 5.2vw, 64px) * 1.05);
 }
 
 .skel-note {
   width: 20rem;
+  height: calc(13px * 1.45 * 2);
+}
+
+.skel-board-slot {
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--navy-rule);
+}
+
+.skel-board-slot:last-child {
+  border-bottom: 0;
 }
 
 .skel-board-row {
   display: block;
-  height: 20px;
-  margin: 18px 28px;
+  height: calc(17px * 1.45);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -36,7 +36,7 @@ describe('parseOrders on the real export', () => {
   test('ORD-1004 null customer becomes no customer record', () => {
     const order = byId('ORD-1004');
     expect(order.customer).toBeNull();
-    expect(order.issues).toEqual([{ field: 'customer', message: 'No customer record' }]);
+    expect(order.issues).toEqual([{ severity: 'defect', field: 'customer', message: 'No customer record' }]);
   });
 
   test('ORD-1005 very long name is kept whole with no issue', () => {
@@ -62,13 +62,14 @@ describe('parseOrders on the real export', () => {
   test('ORD-1014 blank name becomes null and flagged, email kept', () => {
     const order = byId('ORD-1014');
     expect(order.customer).toEqual({ name: null, email: 'no-name@example.com' });
-    expect(order.issues).toEqual([{ field: 'name', message: 'Name blank in export' }]);
+    expect(order.issues).toEqual([{ severity: 'defect', field: 'name', message: 'Name blank in export' }]);
   });
 
   test('ORD-1016 zero paid total stays a valid amount with an informational issue', () => {
     const order = byId('ORD-1016');
     expect(order.amount).toEqual({ minor: 0, currency: 'GBP' });
     expect(messages(order)).toEqual(['Paid order with a zero total']);
+    expect(order.issues[0]?.severity).toBe('note');
   });
 
   test('only the known defect rows carry issues', () => {

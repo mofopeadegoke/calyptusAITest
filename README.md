@@ -38,7 +38,7 @@ The dev and preview servers run with Vite's SPA fallback turned off (`appType: '
 | ORD-1014 | `name` is an empty string. | Shows "(no name)" above the email. The row has a "Name blank in export" data issue. |
 | ORD-1016 | A paid order with a total of 0. | Treats £0.00 as a real amount and includes it. The row has an informational "Paid order with a zero total" issue. |
 | ORD-1019, ORD-1020 | Order IDs are not in time order. ORD-1019 was placed after ORD-1020. | Sorts by the timestamp, never by the ID. |
-| All | Timestamps use many UTC offsets (Z, +01:00, +02:00, +03:00, +05:30, -04:00, -05:00, -07:00, -08:00). | Converts each to an instant and shows it in your time zone. The customer's own time is on hover and in the screen reader text. |
+| All | Timestamps use many UTC offsets (Z, +01:00, +02:00, +03:00, +05:30, -04:00, -05:00, -07:00, -08:00). | Converts each to an instant and shows it in your time zone. The customer's own time is printed under it. |
 
 The parser also handles defects that are not in this file: unknown statuses, unreadable or offset-free timestamps, missing currency, non-numeric totals, and non-integer or negative item counts. Each becomes a stated absence plus a data issue on the row. A file that is not shaped like `{"orders": [...]}`, or a row with no order ID, is rejected with an error message.
 
@@ -50,7 +50,7 @@ The parser also handles defects that are not in this file: unknown statuses, unr
 
 **The summary ignores filters.** It always covers every paid order. A total that changes with the search box would be easy to misread as the business total.
 
-**Times.** Times are shown in the viewer's time zone with the zone name, for example "13 Oct 2026, 05:10 BST", and switch to GMT after the clocks go back on 25 Oct 2026. The time in the customer's own offset, for example "12 Oct 2026, 21:10 (UTC−07:00)", is in the hover title and in visually hidden text for screen readers.
+**Times.** Times are shown in the viewer's time zone with the zone name, for example "13 Oct 2026, 05:10 BST", and switch to GMT after the clocks go back on 25 Oct 2026. The time in the customer's own offset, for example "12 Oct 2026, 21:10 (UTC−07:00)", is printed under the local time.
 
 **Money formatting.** All money uses `Intl.NumberFormat('en-GB')`, which gives £, € and US$. US$ keeps dollars distinct from other dollar currencies.
 
@@ -68,7 +68,7 @@ The parser also handles defects that are not in this file: unknown statuses, unr
 - The status filter is a real radio group (fieldset and legend), so arrow keys work.
 - The result count is a polite live region.
 - Sortable headers use `aria-sort` with a button inside. The table caption says how the table is sorted.
-- Data issues are a `<details>` disclosure that you can reach with the keyboard.
+- Each data issue is printed under the value it affects, so it is read with that cell. Informational notes (such as a zero paid total) are styled quieter than real defects.
 - The error state uses `role="alert"` and moves focus to "Try again".
 - The loading state sets `aria-busy` and announces "Loading orders…".
 - The table scrolls inside a focusable, labelled region on narrow screens, so the page itself never scrolls sideways.
