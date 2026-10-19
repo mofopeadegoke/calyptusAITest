@@ -17,3 +17,9 @@ export function statusLabel(status: Status): string {
 export function statusColorVar(status: Status): string {
   return status.kind === 'known' ? STATUS[status.key].colorVar : UNKNOWN_STATUS_COLOR_VAR;
 }
+
+export type StatusFilter = 'all' | StatusKey | `unknown:${string}`;
+
+export function statusFilterOf(status: Status): Exclude<StatusFilter, 'all'> {
+  return status.kind === 'known' ? status.key : `unknown:${status.raw}`;
+}
