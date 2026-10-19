@@ -1,0 +1,7 @@
+node_modules/
+dist/
+coverage/
+.impeccable/*
+!.impeccable/surfaces/
+todo.md
+*.tsbuildinfo
