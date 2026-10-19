@@ -1,5 +1,6 @@
 import { Search } from 'lucide-react';
-import { STATUS, UNKNOWN_STATUS_COLOR_VAR, statusFilterOf, type StatusFilter } from '../domain/status';
+import { useMemo } from 'react';
+import { STATUS, UNKNOWN_STATUS_COLOR_VAR, isStatusKey, statusFilterLabel, statusFilterOf, type StatusFilter } from '../domain/status';
 import { STATUS_KEYS, type Order } from '../domain/types';
 import { LineBar } from './StatusLabel';
 
@@ -17,13 +18,11 @@ function statusOptions(orders: readonly Order[]): StatusOption[] {
     colorVar: STATUS[key].colorVar,
     count: counts.get(key) ?? 0,
   }));
-  const unknown = orders
-    .flatMap((o) => (o.status.kind === 'unknown' ? [o.status.raw] : []))
-    .filter((raw, i, all) => all.indexOf(raw) === i)
-    .map((raw): StatusOption => {
-      const value = `unknown:${raw}` as const;
-      return { value, label: raw, colorVar: UNKNOWN_STATUS_COLOR_VAR, count: counts.get(value) ?? 0 };
-    });
+  const unknown: StatusOption[] = [];
+  for (const [value, count] of counts) {
+    if (value === 'all' || isStatusKey(value)) continue;
+    unknown.push({ value, label: statusFilterLabel(value), colorVar: UNKNOWN_STATUS_COLOR_VAR, count });
+  }
   return [{ value: 'all', label: 'All', colorVar: null, count: orders.length }, ...known, ...unknown];
 }
 
@@ -37,6 +36,7 @@ type ToolbarProps = {
 };
 
 export function Toolbar({ orders, query, status, shown, onQueryChange, onStatusChange }: ToolbarProps) {
+  const options = useMemo(() => statusOptions(orders), [orders]);
   return (
     <div className="toolbar">
       <div className="search">
@@ -56,7 +56,7 @@ export function Toolbar({ orders, query, status, shown, onQueryChange, onStatusC
       <fieldset className="chips">
         <legend>Status</legend>
         <div className="chip-row">
-          {statusOptions(orders).map((option) => (
+          {options.map((option) => (
             <label key={option.value} className="chip">
               <input
                 type="radio"

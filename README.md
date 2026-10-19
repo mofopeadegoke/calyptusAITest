@@ -40,7 +40,7 @@ The dev and preview servers run with Vite's SPA fallback turned off (`appType: '
 | ORD-1019, ORD-1020 | Order IDs are not in time order. ORD-1019 was placed after ORD-1020. | Sorts by the timestamp, never by the ID. |
 | All | Timestamps use many UTC offsets (Z, +01:00, +02:00, +03:00, +05:30, -04:00, -05:00, -07:00, -08:00). | Converts each to an instant and shows it in your time zone. The customer's own time is printed under it. |
 
-The parser also handles defects that are not in this file: unknown statuses, unreadable or offset-free timestamps, missing currency, non-numeric totals, and non-integer or negative item counts. Each becomes a stated absence plus a data issue on the row. A file that is not shaped like `{"orders": [...]}`, or a row with no order ID, is rejected with an error message.
+The parser also handles defects that are not in this file: unknown or missing statuses, unreadable, offset-free or impossible timestamps (such as 31 February), missing currency, non-numeric totals, and non-integer or negative item counts. Each becomes a stated absence plus a data issue on the row. Some values are kept but flagged on the row: numeric order IDs, negative totals, totals with more than 2 decimals (rounded half up), and order IDs that appear more than once. The paid summary leaves out negative totals and counts a repeated ID only once, and it says when it has done either. A file that is not shaped like `{"orders": [...]}`, or a row with no order ID, is rejected with an error message.
 
 ## Decisions and tradeoffs
 

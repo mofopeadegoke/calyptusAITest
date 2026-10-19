@@ -72,7 +72,7 @@ describe('sorting', () => {
   });
 
   test('null dates sort last in both directions and ties break by id', () => {
-    const undated = (id: string): Order => ({ ...orders[0]!, id, createdAt: null });
+    const undated = (id: string): Order => ({ ...orders[0]!, id, key: id, createdAt: null });
     const list = [undated('Z-2'), undated('Z-1'), ...orders];
     for (const dir of ['asc', 'desc'] as const) {
       const ids = selectOrders(list, { query: '', status: 'all', sort: { key: 'date', dir } }).map((o) => o.id);

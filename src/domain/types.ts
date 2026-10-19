@@ -9,7 +9,7 @@ export type Status = { kind: 'known'; key: StatusKey } | { kind: 'unknown'; raw:
 
 export type Customer = { name: string | null; email: string | null } | null;
 
-export type IssueField = 'customer' | 'name' | 'total' | 'created_at' | 'items' | 'status' | 'currency';
+export type IssueField = 'id' | 'customer' | 'name' | 'total' | 'created_at' | 'items' | 'status' | 'currency';
 
 export type DataIssue = {
   severity: 'defect' | 'note';
@@ -19,6 +19,8 @@ export type DataIssue = {
 
 export type Order = {
   id: string;
+  /** Unique per row even when the export repeats an ID. */
+  key: string;
   customer: Customer;
   amount: Money | null;
   status: Status;

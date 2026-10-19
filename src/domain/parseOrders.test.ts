@@ -132,6 +132,68 @@ describe('parseOrders on synthetic defects', () => {
   test('money rounds to integer minor units', () => {
     expect(one({ total: 0.1 + 0.2 }).amount?.minor).toBe(30);
   });
+
+  test.each([
+    [1.005, 101],
+    ['0.285', 29],
+    [-1.005, -101],
+  ])('total %j rounds half up to %i minor units', (total, minor) => {
+    expect(one({ total }).amount?.minor).toBe(minor);
+  });
+
+  test('more than 2 decimals is flagged', () => {
+    expect(messages(one({ total: 10.999 }))).toEqual(['Total had more than 2 decimal places; rounded to 11.00']);
+  });
+
+  test('trailing zeros past 2 decimals are not flagged', () => {
+    expect(one({ total: '10.500' }).issues.map((i) => i.message)).toEqual(['Total was text in the export; read as 10.50']);
+  });
+
+  test.each([-129, '-129.00'])('negative total %j is kept and flagged', (total) => {
+    const order = one({ total });
+    expect(order.amount?.minor).toBe(-12900);
+    expect(messages(order)).toContain('Negative total in export');
+  });
+
+  test.each(['2026-02-31T10:00:00Z', '2026-13-01T10:00:00Z', '2026-10-01T24:00:00Z', '2026-10-01T10:60:00Z'])(
+    'impossible timestamp %s becomes null',
+    (created_at) => {
+      const order = one({ created_at });
+      expect(order.createdAt).toBeNull();
+      expect(order.issues.map((i) => i.field)).toEqual(['created_at']);
+    },
+  );
+
+  test('29 February in a leap year is accepted', () => {
+    expect(one({ created_at: '2028-02-29T10:00:00Z' }).createdAt?.toISOString()).toBe('2028-02-29T10:00:00.000Z');
+  });
+
+  test('missing status does not collide with a literal "missing" status', () => {
+    expect(one({ status: null }).status).toEqual({ kind: 'unknown', raw: '' });
+    expect(messages(one({ status: null }))).toEqual(['Status missing in export']);
+    expect(one({ status: 'missing' }).status).toEqual({ kind: 'unknown', raw: 'missing' });
+  });
+
+  test('unknown statuses group case-insensitively', () => {
+    expect(one({ status: 'Shipped' }).status).toEqual(one({ status: 'shipped' }).status);
+    expect(messages(one({ status: 'Shipped' }))).toEqual(['Status “Shipped” is not one the dashboard knows']);
+  });
+
+  test('a numeric order ID is read as text and flagged', () => {
+    const order = one({ id: 1025 });
+    expect(order.id).toBe('1025');
+    expect(order.issues).toEqual([{ severity: 'defect', field: 'id', message: 'Order ID was a number in the export' }]);
+  });
+
+  test('repeated order IDs are flagged and get unique keys', () => {
+    const repeated = parseOrders({ orders: [base, base, { ...base, id: 'X-2' }] });
+    expect(repeated.map((o) => o.key)).toEqual(['X-1', 'X-1#2', 'X-2']);
+    expect(repeated.map((o) => messages(o))).toEqual([
+      ['Order ID appears 2 times in the export'],
+      ['Order ID appears 2 times in the export'],
+      [],
+    ]);
+  });
 });
 
 describe('parseOrders rejects a malformed export', () => {
@@ -140,6 +202,14 @@ describe('parseOrders rejects a malformed export', () => {
   });
 
   test('a row without an id throws', () => {
-    expect(() => parseOrders({ orders: [{ total: 1 }] })).toThrow(OrdersFormatError);
+    expect(() => parseOrders({ orders: [{ total: 1 }] })).toThrow('Order 1 in the export has no order ID.');
+  });
+
+  test('a row with an unreadable id says so', () => {
+    expect(() => parseOrders({ orders: [{ id: { n: 1 } }] })).toThrow('Order 1 in the export has an unreadable order ID.');
+  });
+
+  test('a row that is not an object says so', () => {
+    expect(() => parseOrders({ orders: ['ORD-1'] })).toThrow('Order 1 in the export is not an order record.');
   });
 });

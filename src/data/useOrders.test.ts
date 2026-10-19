@@ -1,4 +1,4 @@
-import { ordersRequest } from './useOrders';
+import { ordersRequest, wait } from './useOrders';
 
 describe('ordersRequest', () => {
   test('defaults to the real export with no delay', () => {
@@ -16,5 +16,20 @@ describe('ordersRequest', () => {
     ['?delay=soon', 0],
   ])('%s waits %i ms', (search, delayMs) => {
     expect(ordersRequest(search).delayMs).toBe(delayMs);
+  });
+});
+
+describe('wait', () => {
+  test('rejects when aborted during the delay', async () => {
+    const controller = new AbortController();
+    const waiting = wait(10_000, controller.signal);
+    controller.abort();
+    await expect(waiting).rejects.toThrow();
+  });
+
+  test('rejects at once when already aborted', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    await expect(wait(10_000, controller.signal)).rejects.toThrow();
   });
 });

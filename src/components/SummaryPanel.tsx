@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { formatMoney, RATES_TO_GBP, summarisePaid, type PaidLine } from '../domain/money';
 import type { Order } from '../domain/types';
 
@@ -15,6 +16,15 @@ function joinWords(words: string[]): string {
 
 function plural(count: number, one: string, many: string): string {
   return `${count} ${count === 1 ? one : many}`;
+}
+
+function Uncounted({ count, reason }: { count: number; reason: string }) {
+  if (count === 0) return null;
+  return (
+    <p className="summary-note">
+      {plural(count, 'paid order has', 'paid orders have')} {reason} and {count === 1 ? 'is' : 'are'} not counted.
+    </p>
+  );
 }
 
 function Approx() {
@@ -38,7 +48,7 @@ function Conversion({ line }: { line: PaidLine }) {
 }
 
 export function SummaryPanel({ orders }: { orders: readonly Order[] }) {
-  const summary = summarisePaid(orders);
+  const summary = useMemo(() => summarisePaid(orders), [orders]);
   const converted = summary.lines.filter((l) => l.currency !== 'GBP' && l.gbpMinor !== null).map((l) => l.currency);
   const notes = [plural(summary.paidCount, 'paid order', 'paid orders')];
   if (converted.length > 0) {
@@ -59,12 +69,9 @@ export function SummaryPanel({ orders }: { orders: readonly Order[] }) {
             {joinWords(summary.unconverted)} not included in the total: no fixed rate.
           </p>
         )}
-        {summary.missingTotals > 0 && (
-          <p className="summary-note">
-            {plural(summary.missingTotals, 'paid order has', 'paid orders have')} no total in the export and{' '}
-            {summary.missingTotals === 1 ? 'is' : 'are'} not counted.
-          </p>
-        )}
+        <Uncounted count={summary.missingTotals} reason="no total in the export" />
+        <Uncounted count={summary.negativeTotals} reason="a negative total in the export" />
+        <Uncounted count={summary.repeatedIds} reason="an order ID that was already counted" />
       </div>
       <ul className="board" aria-label="Paid orders by currency">
         {summary.lines.map((line) => (

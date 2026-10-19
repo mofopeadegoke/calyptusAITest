@@ -31,6 +31,8 @@ export type PaidSummary = {
   lines: PaidLine[];
   unconverted: Currency[];
   missingTotals: number;
+  negativeTotals: number;
+  repeatedIds: number;
 };
 
 function lineOrder(a: PaidLine, b: PaidLine): number {
@@ -45,10 +47,22 @@ export function summarisePaid(
 ): PaidSummary {
   const paid = orders.filter((o) => o.status.kind === 'known' && o.status.key === 'paid');
   const subtotals = new Map<Currency, { count: number; minor: number }>();
+  const counted = new Set<string>();
   let missingTotals = 0;
+  let negativeTotals = 0;
+  let repeatedIds = 0;
   for (const order of paid) {
+    if (counted.has(order.id)) {
+      repeatedIds += 1;
+      continue;
+    }
+    counted.add(order.id);
     if (order.amount === null) {
       missingTotals += 1;
+      continue;
+    }
+    if (order.amount.minor < 0) {
+      negativeTotals += 1;
       continue;
     }
     const entry = subtotals.get(order.amount.currency) ?? { count: 0, minor: 0 };
@@ -64,11 +78,13 @@ export function summarisePaid(
   lines.sort(lineOrder);
 
   return {
-    paidCount: paid.length,
+    paidCount: counted.size,
     gbpApproxMinor: lines.reduce((sum, line) => sum + (line.gbpMinor ?? 0), 0),
     isApprox: lines.some((line) => line.currency !== 'GBP' && line.gbpMinor !== null),
     lines,
     unconverted: lines.filter((line) => line.gbpMinor === null).map((line) => line.currency),
     missingTotals,
+    negativeTotals,
+    repeatedIds,
   };
 }

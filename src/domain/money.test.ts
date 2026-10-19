@@ -36,8 +36,10 @@ describe('summarisePaid on the real export', () => {
 });
 
 describe('summarisePaid edge cases', () => {
+  let next = 0;
   const order = (overrides: Partial<Order>): Order => ({
-    id: 'X',
+    id: `X-${++next}`,
+    key: `X-${next}`,
     customer: null,
     amount: { minor: 1000, currency: 'GBP' },
     status: { kind: 'known', key: 'paid' },
@@ -62,6 +64,20 @@ describe('summarisePaid edge cases', () => {
     const summary = summarisePaid([order({}), order({ amount: null })]);
     expect(summary.missingTotals).toBe(1);
     expect(summary.paidCount).toBe(2);
+    expect(summary.gbpApproxMinor).toBe(1000);
+  });
+
+  test('paid orders with a negative total are counted apart, not summed', () => {
+    const summary = summarisePaid([order({}), order({ amount: { minor: -12900, currency: 'GBP' } })]);
+    expect(summary.negativeTotals).toBe(1);
+    expect(summary.gbpApproxMinor).toBe(1000);
+  });
+
+  test('a repeated order ID is summed once', () => {
+    const first = order({});
+    const summary = summarisePaid([first, { ...first, key: `${first.key}#2` }]);
+    expect(summary.repeatedIds).toBe(1);
+    expect(summary.paidCount).toBe(1);
     expect(summary.gbpApproxMinor).toBe(1000);
   });
 

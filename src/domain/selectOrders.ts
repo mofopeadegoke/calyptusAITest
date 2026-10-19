@@ -37,7 +37,7 @@ export function selectOrders(orders: readonly Order[], { query, status, sort }: 
         if (b.value === null) return -1;
         return (a.value - b.value) * direction;
       }
-      return a.order.id.localeCompare(b.order.id);
+      return a.order.key.localeCompare(b.order.key);
     })
     .map(({ order }) => order);
 }

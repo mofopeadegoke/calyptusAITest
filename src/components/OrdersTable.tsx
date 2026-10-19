@@ -96,9 +96,10 @@ export function OrdersTable({ orders, sort, onSort }: OrdersTableProps) {
         </thead>
         <tbody>
           {orders.map((order) => (
-            <tr key={order.id}>
+            <tr key={order.key}>
               <th scope="row" className="order-id">
                 {order.id}
+                <CellIssues issues={order.issues} fields={['id']} />
               </th>
               <td className="customer">
                 <CustomerCell customer={order.customer} />

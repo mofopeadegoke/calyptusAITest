@@ -14,11 +14,22 @@ export function ordersRequest(search: string): { url: string; delayMs: number } 
 
 class LoadError extends Error {}
 
-function wait(ms: number, signal: AbortSignal): Promise<void> {
+export function wait(ms: number, signal: AbortSignal): Promise<void> {
   if (ms === 0) return Promise.resolve();
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
+    if (signal.aborted) {
+      reject(signal.reason);
+      return;
+    }
     const timer = setTimeout(resolve, ms);
-    signal.addEventListener('abort', () => clearTimeout(timer), { once: true });
+    signal.addEventListener(
+      'abort',
+      () => {
+        clearTimeout(timer);
+        reject(signal.reason);
+      },
+      { once: true },
+    );
   });
 }
 
