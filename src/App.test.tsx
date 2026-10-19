@@ -183,6 +183,19 @@ describe('filtering and sorting', () => {
   });
 });
 
+describe('unknown statuses', () => {
+  test('pass through as their own filter chip and label', async () => {
+    const extra = { ...exportFile.orders[0], id: 'ORD-2000', status: 'disputed' };
+    mockFetch(respondWith({ orders: [...exportFile.orders, extra] }));
+    const user = userEvent.setup();
+    render(<App />);
+    const chip = await screen.findByRole('radio', { name: 'disputed 1 orders' });
+    await user.click(chip);
+    expect(bodyRowIds()).toEqual(['ORD-2000']);
+    expect(screen.getByRole('rowheader', { name: /ORD-2000/ }).closest('tr')).toHaveTextContent('disputed');
+  });
+});
+
 describe('empty export', () => {
   test('says the export has no orders', async () => {
     mockFetch(respondWith({ orders: [] }));
