@@ -50,7 +50,7 @@ function CustomerCell({ customer }: { customer: Order['customer'] }) {
   if (customer === null) return <Absent>Unknown customer</Absent>;
   return (
     <>
-      <span className="customer-name">{customer.name ?? <Absent>(no name)</Absent>}</span>
+      <span className="customer-name">{customer.name ?? <Absent>(no name)</Absent>}</span>{' '}
       <span className="customer-email">{customer.email ?? <Absent>(no email)</Absent>}</span>
     </>
   );
@@ -61,7 +61,7 @@ function PlacedCell({ order }: { order: Order }) {
   const atSource = order.sourceOffset ? formatAtSource(order.createdAt, order.sourceOffset) : null;
   return (
     <>
-      <time dateTime={order.createdAt.toISOString()}>{formatLocal(order.createdAt)}</time>
+      <time dateTime={order.createdAt.toISOString()}>{formatLocal(order.createdAt)}</time>{' '}
       {atSource && <span className="source-time">Customer's time {atSource}</span>}
     </>
   );

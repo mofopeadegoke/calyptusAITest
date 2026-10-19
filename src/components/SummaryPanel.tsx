@@ -75,10 +75,11 @@ export function SummaryPanel({ orders }: { orders: readonly Order[] }) {
       </div>
       <ul className="board" aria-label="Paid orders by currency">
         {summary.lines.map((line) => (
+          // The spaces keep screen readers from running the cells together; the grid ignores them.
           <li key={line.currency}>
-            <span className="board-code">{line.currency}</span>
-            <span className="board-count">{plural(line.count, 'order', 'orders')}</span>
-            <span className="board-exact">{formatMoney({ minor: line.minor, currency: line.currency })}</span>
+            <span className="board-code">{line.currency}</span>{' '}
+            <span className="board-count">{plural(line.count, 'order', 'orders')}</span>{' '}
+            <span className="board-exact">{formatMoney({ minor: line.minor, currency: line.currency })}</span>{' '}
             <span className="board-gbp">
               <Conversion line={line} />
             </span>

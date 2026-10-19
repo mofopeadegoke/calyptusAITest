@@ -58,9 +58,9 @@ describe('loading', () => {
     expect(summary).toHaveTextContent('15 paid orders · EUR and USD converted at fixed rates as of 19 Oct 2026');
     const lines = within(screen.getByRole('list', { name: 'Paid orders by currency' })).getAllByRole('listitem');
     expect(lines.map((li) => li.textContent)).toEqual([
-      'GBP6 orders£1,542.00exact',
-      'EUR6 orders€1,663.40≈ approximately £1,447.16 at 0.87',
-      'USD3 ordersUS$1,798.99≈ approximately £1,421.20 at 0.79',
+      'GBP 6 orders £1,542.00 exact',
+      'EUR 6 orders €1,663.40 ≈ approximately £1,447.16 at 0.87',
+      'USD 3 orders US$1,798.99 ≈ approximately £1,421.20 at 0.79',
     ]);
   });
 
@@ -73,6 +73,19 @@ describe('loading', () => {
 
     const totalCell = within(row('ORD-1006')).getByText('€149.50').closest('td')!;
     expect(within(totalCell).getByText('Total was text in the export; read as 149.50')).toBeVisible();
+  });
+
+  test('customer name and email are read as separate words', async () => {
+    await renderReady();
+    const row = screen.getByRole('rowheader', { name: /ORD-1013/ }).closest('tr')!;
+    expect(row.querySelector('.customer')?.textContent).toMatch(/Müller \S+@example\.de/);
+  });
+
+  test('search and filters sit in a search landmark', async () => {
+    await renderReady();
+    const landmark = screen.getByLabelText('Search by customer name or email').closest('search');
+    expect(landmark).not.toBeNull();
+    expect(within(landmark as HTMLElement).getByRole('group', { name: 'Status' })).toBeInTheDocument();
   });
 
   test('times show the viewer zone and carry the customer time', async () => {
@@ -134,13 +147,14 @@ describe('filtering and sorting', () => {
     const group = screen.getByRole('group', { name: 'Status' });
     const radios = within(group).getAllByRole('radio');
     expect(radios.map((r) => r.closest('label')?.textContent)).toEqual([
-      'All24 orders',
-      'Paid15 orders',
-      'Pending3 orders',
-      'Refunded3 orders',
-      'Failed2 orders',
-      'Chargeback1 orders',
+      'All 24 orders',
+      'Paid 15 orders',
+      'Pending 3 orders',
+      'Refunded 3 orders',
+      'Failed 2 orders',
+      'Chargeback 1 orders',
     ]);
+    expect(within(group).getByRole('radio', { name: 'Paid 15 orders' })).toBeInTheDocument();
     await user.click(within(group).getByRole('radio', { name: /Chargeback/ }));
     expect(bodyRowIds()).toEqual(['ORD-1009']);
 

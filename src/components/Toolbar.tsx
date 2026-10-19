@@ -38,7 +38,7 @@ type ToolbarProps = {
 export function Toolbar({ orders, query, status, shown, onQueryChange, onStatusChange }: ToolbarProps) {
   const options = useMemo(() => statusOptions(orders), [orders]);
   return (
-    <div className="toolbar">
+    <search className="toolbar">
       <div className="search">
         <label htmlFor="order-search">Search by customer name or email</label>
         <div className="search-field">
@@ -66,7 +66,7 @@ export function Toolbar({ orders, query, status, shown, onQueryChange, onStatusC
                 onChange={() => onStatusChange(option.value)}
               />
               {option.colorVar && <LineBar colorVar={option.colorVar} />}
-              <span className="chip-label">{option.label}</span>
+              <span className="chip-label">{option.label}</span>{' '}
               <span className="chip-count">
                 {option.count}
                 <span className="vh"> orders</span>
@@ -78,6 +78,6 @@ export function Toolbar({ orders, query, status, shown, onQueryChange, onStatusC
       <p className="result-count" aria-live="polite">
         Showing {shown} of {orders.length} orders
       </p>
-    </div>
+    </search>
   );
 }
